@@ -49,9 +49,14 @@ def guisetup(stack):
 
     cx = wid / 2  # center of width
     cmap = cm.get_cmap('YlOrBr', n + 1)
+    
 
     # Draw pancakes
     # ***ENTER CODE HERE*** (10 lines)
+    for i in range(n):
+        pancake = Line(Point(margin + (15 * i), hei - margin - (thickness*i)), Point(wid - (margin + 15 * i), hei - margin - (thickness*i)))
+        pancake.setWidth(thickness)
+        pancake.draw(gui)
 
     # Add text objects for instructions and status updates
     instructions = Text(Point(10, hei - 12), "Press a # to flip pancakes, 'g' to run GBFS, Escape to quit")

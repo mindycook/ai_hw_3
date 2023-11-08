@@ -49,13 +49,15 @@ def guisetup(stack):
 
     cx = wid / 2  # center of width
     cmap = cm.get_cmap('YlOrBr', n + 1)
-    
 
     # Draw pancakes
     # ***ENTER CODE HERE*** (10 lines)
     for i in range(n):
-        pancake = Line(Point(margin + (15 * i), hei - margin - (thickness*i)), Point(wid - (margin + 15 * i), hei - margin - (thickness*i)))
+        x = (margin + (15 * i))
+        y = hei - margin - (thickness*i)
+        pancake = Line(Point(x, y), Point(wid - x, y))
         pancake.setWidth(thickness)
+        pancake.setFill(color_rgb(int(cmap(i)[0]*255), int(cmap(i)[1]*255), int(cmap(i)[2]*255)))
         pancake.draw(gui)
 
     # Add text objects for instructions and status updates

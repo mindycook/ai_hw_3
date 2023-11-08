@@ -42,7 +42,7 @@ def guisetup(stack):
     '''Create graphical user interface for a stack of n pancakes.'''
     n = len(stack)  # number of pancakes in the stack
     thickness = 12  # thickness of each pancake, in pixels
-    margin = 40
+    margin = 40 # Space between wall and pancake on each side
     wid = margin * 2 + 30 * max(n + 1, 9)  # each successive pancake gets 30 px wider
     hei = margin * 2 + n * thickness  # top/bottom margins of 40 px + 12 px per pancake
     gui = GraphWin("Pancakes", wid, hei)
@@ -50,13 +50,30 @@ def guisetup(stack):
     cx = wid / 2  # center of width
     cmap = cm.get_cmap('YlOrBr', n + 1)
     
+    # Change Background Color of GUI
+    gui.setBackground("#dee2e6")
+    
 
     # Draw pancakes
     # ***ENTER CODE HERE*** (10 lines)
-    for i in range(n):
+    for i in range(n): # For every pancake
+        # Create Pancake Object
         pancake = Line(Point(margin + (15 * i), hei - margin - (thickness*i)), Point(wid - (margin + 15 * i), hei - margin - (thickness*i)))
+        # Set Thickness of Pancake
         pancake.setWidth(thickness)
+        # Draw Pancake on Board
         pancake.draw(gui)
+        # Get Unformatted Color Values from Color Map (MatPlotLib)
+        color_array = cmap(n-i)
+        # Formatted RGB Color Values
+        r, g, b = int(color_array[0] * 255), int(color_array[1] * 255), int(color_array[2] * 255)
+        # Convert RGB Value to Hex Value
+        pancakecolor = color_rgb(r, g, b)
+        # Set Pancake to Color of Hex Value
+        pancake.setFill(pancakecolor)
+        
+    # Before Adding Text Object, Reverse Order of Pancakes
+    gui.items.reverse()
 
     # Add text objects for instructions and status updates
     instructions = Text(Point(10, hei - 12), "Press a # to flip pancakes, 'g' to run GBFS, Escape to quit")
@@ -78,15 +95,52 @@ def flip(gui, stack, p):
 
     # Get graphics objects from GUI
     obj = gui.items
+    # Pancakes is a List of Line Objects
     pancakes = obj[:-2]
+    # 2nd Last Text Object from GUI
+    anchor = obj[-2]
+    # Last Text Object from GUI
     status = obj[-1]
-
+    
     # Update status text on GUI
     status.setText(f"Flipping {p} pancake{'s' if p > 1 else ''}")
+    
+    # Create a Copy of Pancakes for Reference to Find Difference
+    original_cakes = pancakes[:]
 
     # Move pancakes around in the GUI
-    # ***ENTER CODE HERE*** (5 lines)
-    # thickness = pancakes[0].config['width']  # may be a helpful variable :)
+    # ***ENTER CODE HERE*** (5 lines) 
+    
+    # Get Sublist of Pancakes to be Flipped
+    subcakes = pancakes[:p]
+    
+    # Delete Sublist from Main Pancakes List
+    del pancakes[:p]
+    
+    # Reverse List of Pancakes
+    pancakes.reverse()
+    
+    # Extend Pancake Sublist to End of Pancakes
+    pancakes.extend(subcakes)
+    
+    # Reverse Pancakes Again to Correct Order
+    pancakes.reverse()
+       
+    # Thickness of Pancake
+    thickness = pancakes[0].config['width']  # may be a helpful variable :)
+    
+    # Draw Updated Pancakes
+    for i in range(len(pancakes)):
+        # Find Difference of Length (Indices) each Pancake Shifted
+        difference = i - original_cakes.index(pancakes[i])
+        # Move Pancake Line Objects to Updated Position
+        original_cakes[i].move(0, difference * thickness * -1)
+        
+    # Update Items in GUI
+    gui.items = pancakes # List of Rearranged Pancakes
+    gui.items.append(anchor) # First Text Object
+    gui.items.append(status) # Second Text Object
+    
 
     # Update the stack (which is separate from the graphics objects)
     # ***ENTER CODE HERE*** (2 lines)

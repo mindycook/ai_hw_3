@@ -108,23 +108,27 @@ def flip(gui, stack, p):
     # Create a Copy of Pancakes for Reference to Find Difference
     original_cakes = pancakes[:]
 
-    # Move pancakes around in the GUI
-    # ***ENTER CODE HERE*** (5 lines) 
+    # Move pancakes around in the GUI --------------------------
     
     # Get Sublist of Pancakes to be Flipped
     subcakes = pancakes[:p]
+    substack = stack[:p]
     
     # Delete Sublist from Main Pancakes List
     del pancakes[:p]
+    del stack[:p]
     
     # Reverse List of Pancakes
     pancakes.reverse()
+    stack.reverse()
     
     # Extend Pancake Sublist to End of Pancakes
     pancakes.extend(subcakes)
+    stack.extend(substack)
     
     # Reverse Pancakes Again to Correct Order
     pancakes.reverse()
+    stack.reverse()
        
     # Thickness of Pancake
     thickness = pancakes[0].config['width']  # may be a helpful variable :)
@@ -141,17 +145,27 @@ def flip(gui, stack, p):
     gui.items.append(anchor) # First Text Object
     gui.items.append(status) # Second Text Object
     
-
-    # Update the stack (which is separate from the graphics objects)
-    # ***ENTER CODE HERE*** (2 lines)
-
+    print(stack)    
+    print(cost(stack))
+    
+    # Return Updated Stack
     return stack
 
 def cost(stack):
     '''Compute the cost h(stack) for a given stack of pancakes.
     Here, we define cost as the number of pancakes in the wrong position.'''
+   
     # ***MODIFY CODE HERE*** (2 lines)
-    h = 0
+    h = 0 # Number of Pancakes in Incorrect Position
+    
+    # For Every Pancake in Stack
+    for i in range(len(stack)):
+        # If Pancake is in Incorrect Position (Index)
+        if stack[i] != i:
+            # Increment Number of Incorrect Pancakes
+            h += 1
+    
+    # Return Cost
     return h
 
 def gbfs(gui, stack):

@@ -48,7 +48,7 @@ def guisetup(stack):
     gui = GraphWin("Pancakes", wid, hei)
 
     cx = wid / 2  # center of width
-    cmap = cm.get_cmap('YlOrBr', n + 1)
+    cmap = cm.get_cmap('YlOrBr', n + 1) # YlOrBr
     
     # Change Background Color of GUI
     gui.setBackground("#dee2e6")
@@ -145,9 +145,6 @@ def flip(gui, stack, p):
     gui.items.append(anchor) # First Text Object
     gui.items.append(status) # Second Text Object
     
-    print(stack)    
-    print(cost(stack))
-    
     # Return Updated Stack
     return stack
 
@@ -180,16 +177,84 @@ def gbfs(gui, stack):
     # Update status text on GUI
     status.setText(f"Running greedy best-first search...")
     time.sleep(0.5)
-
-    # ***MODIFY CODE HERE*** (20-25 lines)
+   
+    # Count # of Iterations / Paths Searched
     cnt = 0
+    
+    # Initialze Desired Solution Path to Compares States to
+    desired_solution = list(range(len(stack))) # [0, 1, 2, 3, 4, 5, ..., n-1]
+    
+    # Initialize Priority Queue
+    pq = PriorityQueue()
+    
+    # Initialize Cost to Nodes
+    cost_to_node = {}
+    
+    # Initialize Backpointers
+    backpointers = {}
+    
+    # Add Starting State to Priority Queue
+    pq.put((cost(stack), stack))
+    
+    # Add Starting State to List of Visited Nodes (Cost)
+    cost_to_node.update({" ".join(map(str, stack)) : 0})
+    
+    # Loop Until Solution Found
+    while True:
+        
+        # If Queue is Empty, Return Failure
+        if pq.qsize == 0:
+            solution = "None found... :("
+            break
+        
+        # Pop Front Node (Stack) from PQ
+        front = pq.get()[1]
+        
+        # Check if Popped Node Contains Goal
+        if front == desired_solution:
+            break
+            
+        # Start Expanding from Front with Each Available Action (# of Pancakes Flipped)
+        for flip in range(2, len(stack) + 1):
+         
+            # Increment Count
+            cnt += 1
+            
+            # Determine Child Node (Returns Updated Stack)
+            child = simulate(front, flip)
+                    
+            # Lists (Stacks) cannot be Elements of a Dictionary, so Convert the Lists to Strings
+            child_str = " ".join(map(str, child))
+            front_str = " ".join(map(str, front))
+            
+            # Determine Cost of Child Node
+            child_cost = cost(child)
+            
+            # Only Add Node to PQ if Child has NOT been Visited
+            if cost_to_node.get(child_str) == None:
+                # Add Child to PQ
+                pq.put((child_cost, child))
+                # Update Cost IN TERMS OF PATH COST (FLIPS)
+                cost_to_node.update({child_str : flip})
+                # Update Backpointer
+                backpointers.update({child_str : front_str})
+    
+    # ------------------------------------
 
     print(f'searched {cnt} paths')
-    print('solution:', '')
+    print(f'solution: {displaySolution(backpointers, cost_to_node)}')
     status.setText("...search is complete")
 
 def simulate(stack, path):
     '''Simulate the flipping of pancakes to determine the resulting stack.'''
+    # Reverse Fake Stack, as This Code Flips the Opposite End
+    fakestack = stack.copy()  # make a copy so we don't actually change the real stack
+    # Reverse Fake Stack, as This Code Flips the Opposite End
+    fakestack.reverse()
+
+    for i in range(1, path // 2 + 1):
+        fakestack[-i], fakestack[- (path - i + 1)] = fakestack[-(path - i + 1)], fakestack[-i]
+    '''
     fakestack = stack.copy()  # make a copy so we don't actually change the real stack
     for action in path:
         try:
@@ -198,8 +263,35 @@ def simulate(stack, path):
                 fakestack[-i], fakestack[- (p - i + 1)] = fakestack[-(p - i + 1)], fakestack[-i]
         except:
             print("INVALID ACTION: Check code")
+    '''
+
+    # Reverse Again Before Sending Back
+    fakestack.reverse()
 
     return fakestack
+
+def displaySolution(backpointers, cost_to_node):
+    # Define Start of Backpointing Stack Solution
+    prev = '0 1 2 3 4 5 6 7'
+           
+    # Initialize Path Solution
+    path = []
+    
+    # Append Backpointer Values to Solution List
+    while prev != None:
+        # Cost is None at End, so Remove after Loop
+        path.append(cost_to_node.get(prev))
+        # Update Prev
+        prev = backpointers.get(prev)
+        
+    # Cost of Beginning State is None, so Remove
+    del path[-1]
+        
+    # Reverse Solution List
+    path.reverse()
+    
+    # Return Solution
+    return " ".join(map(str, path))
 
 if __name__ == "__main__":
     main(parser.parse_args())

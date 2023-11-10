@@ -241,41 +241,6 @@ def gbfs(gui, stack):
     
     # ------------------------------------
 
-    # Initialize priority queue, cost to node, backpointers
-    pq = PriorityQueue()
-     # the previous stack b4 changing
-    backpointers = {stack : None}
-
-    # Add starting node to priority queue
-    pq.put((cost(stack), stack))
-
-    # Loop until solution is found or queue is empty
-    flag = False
-    while not pq.empty():
-        # be sure to avoid repeating states
-        node = pq.get() # Pop the first node off the queue
-        print(f'Searching {node[1]}{node[0]}  | ', end="")
-
-        # Check if we have reached the goal
-        if node[0] == 0:
-            flag = True
-            break
-
-        # For each available action (8 pancakes)
-        for i in range(len(stack)):
-            # Determine the cost of the child node
-            child = flip(gui, stack, i+1)
-            new_cost = cost(child)
-
-            # If the child gives a lower heuristic,
-            if cost(child) == 0 or cost(child) < node[0]:
-                pq.put((cost(child), child))
-                backpointers.append({child : i+1})
-            # Put it on the queue
-
-
-
-
     print(f'searched {cnt} paths')
     print(f'solution: {displaySolution(backpointers, cost_to_node)}')
     status.setText("...search is complete")

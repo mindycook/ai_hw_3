@@ -17,11 +17,29 @@ def main(args):
     # Parse inputs
     n = args.num  # number of pancakes
     stack = list(range(n))
-    if args.seed is not None:  # randomly shuffle the pancakes initially
-        random.shuffle(stack)
-
+    
     # Make the graphical user interface
     gui = guisetup(stack)
+    
+    if args.seed is not None:  # randomly shuffle the pancakes initially
+        # Save a Copy of Stack
+        stackcopy = stack.copy()
+        
+        # Shuffle Stack
+        random.shuffle(stack)
+
+        # Run GBFS on Shuffled Stack to Determine Solution Path to Unshuffled Stack
+        # Then reverse this solution path, send it to the custom function 'run_solution()' which 
+        # will enact the solution path and update the GUI with the shuffled stack!
+        path = gbfs(gui, stack).split(" ")
+        path.reverse()
+        # Reset Stack so Running the Solution will Start with Initial Correct Stack
+        stack = stackcopy
+        # Run Reversed Path to Update GUI with Shuffled Stack
+        run_solution(gui, stack, path, 0.1)
+    
+    # Initialize Path Variable
+    path = '1' # If User Runs Solution without Running GBFS first, 1 Pancake will flip
 
     # Use the graphical user interface
     while True:
@@ -32,7 +50,9 @@ def main(args):
             elif key == 'd':  # debug the program
                 pdb.set_trace()
             elif key == 'g':  # run greedy best-first search
-                path = gbfs(gui, stack)
+                path = gbfs(gui, stack).split(" ")
+            elif key == 'Return': # If Enter Key is Pressed
+                run_solution(gui, stack, path, 1)
             elif key in [str(i) for i in range(1, n + 1)]:  # manually flip some of the pancakes
                 flip(gui, stack, int(key))
 
@@ -76,7 +96,8 @@ def guisetup(stack):
     gui.items.reverse()
 
     # Add text objects for instructions and status updates
-    instructions = Text(Point(10, hei - 12), "Press a # to flip pancakes, 'g' to run GBFS, Escape to quit")
+    instructions = Text(Point(10, hei - 12), '''Press a # to flip pancakes, 'g' to run GBFS, Escape to quit,
+    'Enter' to enact solution''')
     instructions._reconfig("anchor", "w")
     instructions.setSize(8)
     instructions.draw(gui)
@@ -240,10 +261,16 @@ def gbfs(gui, stack):
                 backpointers.update({child_str : front_str})
     
     # ------------------------------------
+    
+    # Initialize Solution Path
+    solution_path = displaySolution(backpointers, cost_to_node)
 
     print(f'searched {cnt} paths')
-    print(f'solution: {displaySolution(backpointers, cost_to_node)}')
+    print(f'solution: {solution_path}')
     status.setText("...search is complete")
+    
+    # Return Solution Path
+    return solution_path
 
 def simulate(stack, path):
     '''Simulate the flipping of pancakes to determine the resulting stack.'''
@@ -293,5 +320,13 @@ def displaySolution(backpointers, cost_to_node):
     # Return Solution
     return " ".join(map(str, path))
 
+def run_solution(gui, stack, path, interval):    
+    # For Every Flip Action in Solution Path, Call Flip Function to Reflect Changes in GUI
+    for action in path:
+        # Slight Time Delay
+        time.sleep(interval)
+        # Call Flip Function
+        stack = flip(gui, stack, int(action))
+        
 if __name__ == "__main__":
     main(parser.parse_args())

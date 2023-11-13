@@ -208,9 +208,10 @@ def cost(node, state):
     for side in range(6):
         center_color = state[4 + side*9]
         for block in range(9):
+            temp = 0
             if state[block + side*9] != center_color:
                 h += 1
-            
+    h = h/6
 
 
     
@@ -334,10 +335,12 @@ def simulate(state, node):
     The input node is a sequence of rotations.'''
     s = state.copy()  # copy the state so that we don't change the actual cube!
     # ***ENTER CODE HERE***  (4 lines)
+    
     for i in node:
-        if "Shift+" in i:
+        if "CCW" in i:
             rotate(s, i, "CCW")
-        rotate(s, i)
+        else:{rotate(s, i)}
+        
 
     return s
 

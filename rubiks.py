@@ -29,16 +29,25 @@ def main(args):
     # cube, but rather the colors of the initial state.
     # ***MODIFY CODE HERE*** (7 lines)
     current_state = []
+    # if the user provided a --state file in args
     if args.state:
+        # the provided file is this
         state_file = args.state
+        # open the provided file
         f = open(state_file, "r")
+        # read the file (it will be a String of numbers)
         state_str = f.readline()
+        # close the file
         f.close()
+        # convert the String into a list of ints
         for i in state_str:
             current_state.append(int(i))
+    # if the user DID NOT provide a --state file
     else:
+        # set current_state to default (the sovled cube)
         for i in range(6):
             current_state += [i] * 3 ** 2
+            print(current_state)
 
     # ***DO NOT MODIFY THE FOLLOWING 2 LINES***
     initial_state = current_state.copy()  # for resetting the cube
@@ -108,7 +117,10 @@ def astar(state, verbose=False):
     '''Run A* search on the cube based on its current state and return the solution path.'''
     print('Running A* search...')
     # ***ENTER CODE HERE*** (20-25 lines)
+    print(cost(state, state))
     cnt = 0
+
+
 
     print(f'searched {cnt} paths')
     print('solution:', '')
@@ -120,10 +132,25 @@ def cost(node, state):
     '''
 
     # ***MODIFY CODE HERE*** (1 line)
-    g = 0
-
-    # ***MODIFY CODE HERE*** (7 lines)
+    g = len(node)
+    
     h = 0
+    # ***MODIFY CODE HERE*** (7 lines)
+    # the colors are 0-5
+    # the sides are in chunks of 9, concurrent
+    for side in range(6):
+        #print(state[4 + side*9])
+        center_color = state[4 + side*9]
+        #print(center_color)
+        
+        for block in range(9):
+            print(state[block + side*9])
+            if state[block + side*9] != center_color:
+                h += 1
+            
+
+
+    
 
     return g + h
 

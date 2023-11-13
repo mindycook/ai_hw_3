@@ -39,7 +39,7 @@ def main(args):
         run_solution(gui, stack, path, 0.1)
     
     # Initialize Path Variable
-    path = '1' # If User Runs Solution without Running GBFS first, 1 Pancake will flip
+    path = ''
 
     # Use the graphical user interface
     while True:
@@ -320,9 +320,12 @@ def displaySolution(backpointers, cost_to_node):
     # Return Solution
     return " ".join(map(str, path))
 
-def run_solution(gui, stack, path, interval):    
+def run_solution(gui, stack, path, interval):  
     # For Every Flip Action in Solution Path, Call Flip Function to Reflect Changes in GUI
     for action in path:
+        # If Action is Invalid, Skip
+        if action == '':
+            continue
         # Slight Time Delay
         time.sleep(interval)
         # Call Flip Function

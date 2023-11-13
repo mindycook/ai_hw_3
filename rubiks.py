@@ -117,8 +117,59 @@ def astar(state, verbose=False):
     '''Run A* search on the cube based on its current state and return the solution path.'''
     print('Running A* search...')
     # ***ENTER CODE HERE*** (20-25 lines)
-    print(cost(state, state))
+
     cnt = 0
+
+    # Initialize desired solution
+    desired_solution = []
+    for i in range(6):
+            desired_solution += [i] * 3 ** 2
+    
+    # Initialize Priority Queue
+    pq = PriorityQueue()
+
+    #Initialize Cost to Nodes
+    cost_to_node = {}
+    
+    # Initialize Backpointers
+    backpointers = {}
+
+    # Add Starting State to Priority Queue
+    solulu = ""
+    pq.put((cost(solulu, state), state))
+
+    # Add Starting State to List of Visited Nodes (Cost)
+    cost_to_node.update({" ".join(map(str, state)) : 0})
+
+    # Loop Until Solution Found
+    while True:
+         # If Queue is Empty, Return Failure
+        if pq.qsize == 0:
+            solution = "None found... :("
+            break
+
+        # Pop Front Node (Stack) from PQ
+        front = pq.get()[1]
+
+        # Check if Popped Node Contains Goal
+        if front == desired_solution:
+            break
+
+        for face in 'UDLRBF':
+
+            #increment count
+            cnt += 1
+
+            # Determine current node
+            solulu += face
+            #Determine Child Node
+            child = simulate(front, solulu)
+
+
+            
+
+
+    
 
 
 
@@ -137,14 +188,10 @@ def cost(node, state):
     h = 0
     # ***MODIFY CODE HERE*** (7 lines)
     # the colors are 0-5
-    # the sides are in chunks of 9, concurrent
+    # the sides are in chunks of 9, concurrent list
     for side in range(6):
-        #print(state[4 + side*9])
         center_color = state[4 + side*9]
-        #print(center_color)
-        
         for block in range(9):
-            print(state[block + side*9])
             if state[block + side*9] != center_color:
                 h += 1
             
@@ -271,6 +318,10 @@ def simulate(state, node):
     The input node is a sequence of rotations.'''
     s = state.copy()  # copy the state so that we don't change the actual cube!
     # ***ENTER CODE HERE***  (4 lines)
+    for i in node:
+        if "Shift+" in i:
+            rotate(s, i, "CCW")
+        rotate(s, i)
 
     return s
 

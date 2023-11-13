@@ -116,9 +116,11 @@ def astar(state, verbose=False):
     '''Run A* search on the cube based on its current state and return the solution path.'''
     print('Running A* search...')
     # ***ENTER CODE HERE*** (20-25 lines)
+    
+    # Initialize Counter
     cnt = 0
 
-    # Initialize desired solution
+    # Initialize Desired Solution
     desired_solution = []
     for i in range(6):
             desired_solution += [i] * 3 ** 2
@@ -126,18 +128,20 @@ def astar(state, verbose=False):
     # Initialize Priority Queue
     pq = PriorityQueue()
 
-    #Initialize Cost to Nodes
+    # Initialize Cost to Nodes
     cost_to_node = {}
     
     # Initialize Backpointers
     backpointers = {}
+    
+    # Initialize Starting Node (Sequence of Actions)
+    node = []
 
     # Add Starting State to Priority Queue
-    solution = ""
-    pq.put((cost(solution, state), state))
+    pq.put((cost(node, state), node, state))
 
     # Add Starting State to List of Visited Nodes (Cost)
-    cost_to_node.update({" ".join(map(str, state)) : 0})
+    cost_to_node.update({" ".join(map(str, state)) : cost(node, state)})
 
     # Loop Until Solution Found
     while True:
@@ -146,51 +150,42 @@ def astar(state, verbose=False):
             solution = "None found... :("
             break
 
-        # Pop Front Node (Stack) from PQ
-        front = pq.get()[1]
+        # Pop Front Node (Sequence of Actions) from PQ
+        front = pq.get()
+        
+        # Increment Count for Each Node Popped
+        cnt += 1
 
         # Check if Popped Node Contains Goal
-        if front == desired_solution:
+        if front[2] == desired_solution:
             break
 
-        for face in 'UDLRBF':
-            solution_try = solution
-            #increment count
-            cnt += 1
+        for action in 'UDLRBF':
+            for direction in ['CW', 'CCW']:
+                # Determine Child Action Sequence
+                node = front[1].copy()
+                node.append([action, direction])
+                
+                # Determine Child State from Current State
+                child = simulate(front[2], node)
+                
+                # Determine Cost of Child State
+                child_cost = cost(node, child)
 
-            # Determine current node
-            solution_try += face
-            #Determine Child Node (Returns Updated Cube State)
-            child = simulate(front, solution_try)
+                # Lists (Stacks) cannot be Elements of a Dictionary, so Convert the Lists to Strings
+                child_str = " ".join(map(str, child))
+                front_str = " ".join(map(str, front))
 
-            # Lists (Stacks) cannot be Elements of a Dictionary, so Convert the Lists to Strings
-            child_str = " ".join(map(str, child))
-            front_str = " ".join(map(str, front))
-
-            # Determine Cost of Child Node
-            child_cost = cost(solution_try, child)
-
-            # Only Add Node to PQ if Child has NOT been visited
-            if cost_to_node.get(child_str) == None:
-                # Add Child to PQ
-                pq.put((child_cost, child))
-
-                #Update Cost
-                cost_to_node.update({child_str : solution_try})
-                # Update Backpointer
-                backpointers.update({child_str : front_str})
-
-
-
-            
-
-
-    
-
+                # Only Add Node to PQ if Child has NOT been visited *OR* Visited with Higher Cost
+                if cost_to_node.get(child_str) == None or cost_to_node.get(child_str) > child_cost:
+                    # Add Child to PQ
+                    pq.put((child_cost, node, child))
+                    # Update Cost
+                    cost_to_node.update({child_str : child_cost})
 
 
     print(f'searched {cnt} paths')
-    print('solution:', '')
+    print(f'solution: {printSolution(front[1])}')
 
 def cost(node, state):
     '''Compute the cost g(node)+h(node) for a given set of moves (node) leading to a cube state.
@@ -212,9 +207,6 @@ def cost(node, state):
             if state[block + side*9] != center_color:
                 h += 1
     h = h/6
-
-
-    
 
     return g + h
 
@@ -336,13 +328,29 @@ def simulate(state, node):
     s = state.copy()  # copy the state so that we don't change the actual cube!
     # ***ENTER CODE HERE***  (4 lines)
     
-    for i in node:
-        if "CCW" in i:
-            rotate(s, i, "CCW")
-        else:{rotate(s, i)}
+    # If Node is Empty, Return Unmodified State
+    if node == []:
+        return s
+    
+    rotate(s, node[-1][0], node[-1][1])
         
-
     return s
+
+def printSolution(actions):
+    # Initialize Result String
+    str = f''
+    
+    # Loop Through all Actions
+    for action in actions:
+        if action[1] == 'CCW':
+            str += f'Shift+{action[0]}, '
+        else:
+            str += f'{action[0]}, '
+            
+    # Return Solution
+    return str[:-2]
+
+        
 
 if __name__ == '__main__':
     main(parser.parse_args())

@@ -47,7 +47,6 @@ def main(args):
         # set current_state to default (the sovled cube)
         for i in range(6):
             current_state += [i] * 3 ** 2
-            print(current_state)
 
     # ***DO NOT MODIFY THE FOLLOWING 2 LINES***
     initial_state = current_state.copy()  # for resetting the cube
@@ -117,7 +116,6 @@ def astar(state, verbose=False):
     '''Run A* search on the cube based on its current state and return the solution path.'''
     print('Running A* search...')
     # ***ENTER CODE HERE*** (20-25 lines)
-
     cnt = 0
 
     # Initialize desired solution
@@ -135,8 +133,8 @@ def astar(state, verbose=False):
     backpointers = {}
 
     # Add Starting State to Priority Queue
-    solulu = ""
-    pq.put((cost(solulu, state), state))
+    solution = ""
+    pq.put((cost(solution, state), state))
 
     # Add Starting State to List of Visited Nodes (Cost)
     cost_to_node.update({" ".join(map(str, state)) : 0})
@@ -156,14 +154,32 @@ def astar(state, verbose=False):
             break
 
         for face in 'UDLRBF':
-
+            solution_try = solution
             #increment count
             cnt += 1
 
             # Determine current node
-            solulu += face
-            #Determine Child Node
-            child = simulate(front, solulu)
+            solution_try += face
+            #Determine Child Node (Returns Updated Cube State)
+            child = simulate(front, solution_try)
+
+            # Lists (Stacks) cannot be Elements of a Dictionary, so Convert the Lists to Strings
+            child_str = " ".join(map(str, child))
+            front_str = " ".join(map(str, front))
+
+            # Determine Cost of Child Node
+            child_cost = cost(solution_try, child)
+
+            # Only Add Node to PQ if Child has NOT been visited
+            if cost_to_node.get(child_str) == None:
+                # Add Child to PQ
+                pq.put((child_cost, child))
+
+                #Update Cost
+                cost_to_node.update({child_str : solution_try})
+                # Update Backpointer
+                backpointers.update({child_str : front_str})
+
 
 
             

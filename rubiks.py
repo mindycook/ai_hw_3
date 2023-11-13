@@ -9,6 +9,7 @@ from queue import PriorityQueue
 parser = argparse.ArgumentParser(description="Solving a Rubik's Cube with A* Search")
 parser.add_argument('-s', '--state', help="text file containing initial state of the cube, encoded as a sequence of integers")
 
+
 def main(args):
     # Initialize dictionary of parameters
     params = {
@@ -28,8 +29,16 @@ def main(args):
     # cube, but rather the colors of the initial state.
     # ***MODIFY CODE HERE*** (7 lines)
     current_state = []
-    for i in range(6):
-        current_state += [i] * params['n'] ** 2
+    if args.state:
+        state_file = args.state
+        f = open(state_file, "r")
+        state_str = f.readline()
+        f.close()
+        for i in state_str:
+            current_state.append(int(i))
+    else:
+        for i in range(6):
+            current_state += [i] * 3 ** 2
 
     # ***DO NOT MODIFY THE FOLLOWING 2 LINES***
     initial_state = current_state.copy()  # for resetting the cube

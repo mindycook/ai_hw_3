@@ -349,7 +349,6 @@ def printSolution(actions):
             
     # Return Solution
     return str[:-2]
-
         
 
 if __name__ == '__main__':

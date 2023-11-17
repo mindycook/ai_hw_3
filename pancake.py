@@ -21,23 +21,6 @@ def main(args):
     # Make the graphical user interface
     gui = guisetup(stack)
     
-    if args.seed is not None:  # randomly shuffle the pancakes initially
-        # Save a Copy of Stack
-        stackcopy = stack.copy()
-        
-        # Shuffle Stack
-        random.shuffle(stack)
-
-        # Run GBFS on Shuffled Stack to Determine Solution Path to Unshuffled Stack
-        # Then reverse this solution path, send it to the custom function 'run_solution()' which 
-        # will enact the solution path and update the GUI with the shuffled stack!
-        path = gbfs(gui, stack).split(" ")
-        path.reverse()
-        # Reset Stack so Running the Solution will Start with Initial Correct Stack
-        stack = stackcopy
-        # Run Reversed Path to Update GUI with Shuffled Stack
-        run_solution(gui, stack, path, 0.1)
-    
     # Initialize Path Variable
     path = ''
 
@@ -50,9 +33,7 @@ def main(args):
             elif key == 'd':  # debug the program
                 pdb.set_trace()
             elif key == 'g':  # run greedy best-first search
-                path = gbfs(gui, stack).split(" ")
-            elif key == 'Return': # If Enter Key is Pressed
-                run_solution(gui, stack, path, 1)
+                path = gbfs(gui, stack)
             elif key in [str(i) for i in range(1, n + 1)]:  # manually flip some of the pancakes
                 flip(gui, stack, int(key))
 
@@ -96,8 +77,7 @@ def guisetup(stack):
     gui.items.reverse()
 
     # Add text objects for instructions and status updates
-    instructions = Text(Point(10, hei - 12), '''Press a # to flip pancakes, 'g' to run GBFS, Escape to quit,
-    'Enter' to enact solution''')
+    instructions = Text(Point(10, hei - 12), '''Press a # to flip pancakes, 'g' to run GBFS, Escape to quit''')
     instructions._reconfig("anchor", "w")
     instructions.setSize(8)
     instructions.draw(gui)
@@ -197,7 +177,6 @@ def gbfs(gui, stack):
 
     # Update status text on GUI
     status.setText(f"Running greedy best-first search...")
-    time.sleep(0.5)
    
     # Count # of Iterations / Paths Searched
     cnt = 0
@@ -211,14 +190,11 @@ def gbfs(gui, stack):
     # Initialize Cost to Nodes
     cost_to_node = {}
     
-    # Initialize Backpointers
-    backpointers = {}
-    
     # Add Starting State to Priority Queue
-    pq.put((cost(stack), stack))
+    pq.put((cost(stack), '', stack))
     
     # Add Starting State to List of Visited Nodes (Cost)
-    cost_to_node.update({" ".join(map(str, stack)) : 0})
+    cost_to_node.update({" ".join(map(str, stack)) : cost(stack)})
     
     # Loop Until Solution Found
     while True:
@@ -229,24 +205,27 @@ def gbfs(gui, stack):
             break
         
         # Pop Front Node (Stack) from PQ
-        front = pq.get()[1]
+        front = pq.get()
+        
+        # Increment Count
+        cnt += 1
         
         # Check if Popped Node Contains Goal
-        if front == desired_solution:
+        if front[2] == desired_solution:
             break
             
         # Start Expanding from Front with Each Available Action (# of Pancakes Flipped)
         for flip in range(2, len(stack) + 1):
-         
-            # Increment Count
-            cnt += 1
+            
+            # Update List/String of Flip Actions
+            node = front[1]
+            node += str(flip)
             
             # Determine Child Node (Returns Updated Stack)
-            child = simulate(front, flip)
+            child = simulate(front[2], flip)
                     
             # Lists (Stacks) cannot be Elements of a Dictionary, so Convert the Lists to Strings
             child_str = " ".join(map(str, child))
-            front_str = " ".join(map(str, front))
             
             # Determine Cost of Child Node
             child_cost = cost(child)
@@ -254,16 +233,14 @@ def gbfs(gui, stack):
             # Only Add Node to PQ if Child has NOT been Visited
             if cost_to_node.get(child_str) == None:
                 # Add Child to PQ
-                pq.put((child_cost, child))
-                # Update Cost IN TERMS OF PATH COST (FLIPS)
-                cost_to_node.update({child_str : flip})
-                # Update Backpointer
-                backpointers.update({child_str : front_str})
+                pq.put((child_cost, node, child))
+                # Update Cost
+                cost_to_node.update({child_str : child_cost})
     
     # ------------------------------------
     
     # Initialize Solution Path
-    solution_path = displaySolution(backpointers, cost_to_node)
+    solution_path = front[1]
 
     print(f'searched {cnt} paths')
     print(f'solution: {solution_path}')
@@ -296,29 +273,6 @@ def simulate(stack, path):
     fakestack.reverse()
 
     return fakestack
-
-def displaySolution(backpointers, cost_to_node):
-    # Define Start of Backpointing Stack Solution
-    prev = '0 1 2 3 4 5 6 7'
-           
-    # Initialize Path Solution
-    path = []
-    
-    # Append Backpointer Values to Solution List
-    while prev != None:
-        # Cost is None at End, so Remove after Loop
-        path.append(cost_to_node.get(prev))
-        # Update Prev
-        prev = backpointers.get(prev)
-        
-    # Cost of Beginning State is None, so Remove
-    del path[-1]
-        
-    # Reverse Solution List
-    path.reverse()
-    
-    # Return Solution
-    return " ".join(map(str, path))
 
 def run_solution(gui, stack, path, interval):  
     # For Every Flip Action in Solution Path, Call Flip Function to Reflect Changes in GUI

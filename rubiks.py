@@ -172,7 +172,7 @@ def astar(state, verbose=False):
                 # Determine Cost of Child State
                 child_cost = cost(node, child)
 
-                # Lists (Stacks) cannot be Elements of a Dictionary, so Convert the Lists to Strings
+                # Lists cannot be Elements of a Dictionary, so Convert the Lists to Strings
                 child_str = " ".join(map(str, child))
                 front_str = " ".join(map(str, front))
 

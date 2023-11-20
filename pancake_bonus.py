@@ -22,6 +22,9 @@ def main(args):
     gui = guisetup(stack)
     
     if args.seed is not None:  # randomly shuffle the pancakes initially
+        # Implememt Seed
+        random.seed(args.seed)
+        
         # Save a Copy of Stack
         stackcopy = stack.copy()
         
